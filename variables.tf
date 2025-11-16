@@ -1,5 +1,7 @@
 // Variables for Phase 1 Terraform configuration
 
+// Variables for Phase 1 Terraform configuration
+
 variable "aws_region" {
   description = "AWS region to deploy into"
   type        = string
@@ -56,3 +58,4 @@ variable "common_tags" {
     Phase   = "phase-1"
   }
 }
+

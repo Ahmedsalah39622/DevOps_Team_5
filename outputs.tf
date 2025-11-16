@@ -34,3 +34,4 @@ output "iot_policy_name" {
   description = "Name of the IoT policy created"
   value       = aws_iot_policy.device_policy.name
 }
+

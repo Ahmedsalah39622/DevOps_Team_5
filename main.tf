@@ -1,8 +1,4 @@
-// Terraform configuration for Phase 1: Infrastructure
-// - Provider
-// - Kinesis stream
-// - AWS IoT Thing, Certificate, Policy and attachments
-// - IoT Topic Rule sending messages to Kinesis (with IAM role)
+
 
 terraform {
   required_providers {

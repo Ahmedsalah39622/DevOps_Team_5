@@ -1,0 +1,61 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "IoTCorePermissions",
+      "Effect": "Allow",
+      "Action": [
+        "iot:DescribeEndpoint",
+        "iot:CreateThing",
+        "iot:DescribeThing",
+        "iot:DeleteThing",
+        "iot:AttachThingPrincipal",
+        "iot:DetachThingPrincipal",
+        "iot:CreateKeysAndCertificate",
+        "iot:CreateCertificateFromCsr",
+        "iot:RegisterCertificate",
+        "iot:CreatePolicy",
+        "iot:DeletePolicy",
+        "iot:CreateTopicRule",
+        "iot:DeleteTopicRule",
+        "iot:GetTopicRule",
+        "iot:ReplaceTopicRule",
+        "iot:AttachPrincipalPolicy",
+        "iot:DetachPrincipalPolicy"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "KinesisPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "kinesis:CreateStream",
+        "kinesis:DescribeStream",
+        "kinesis:ListStreams",
+        "kinesis:DeleteStream",
+        "kinesis:PutRecord",
+        "kinesis:PutRecords"
+      ],
+      "Resource": [
+        "arn:aws:kinesis:us-east-1:768693789298:stream/iot_data_stream",
+        "arn:aws:kinesis:us-east-1:768693789298:stream/*"
+      ]
+    },
+    {
+      "Sid": "IAMForTopicRuleRole",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:PassRole"
+      ],
+      "Resource": [
+        "arn:aws:iam::768693789298:role/iot-kinesis-role",
+        "arn:aws:iam::768693789298:role/*"
+      ]
+    }
+  ]
+}

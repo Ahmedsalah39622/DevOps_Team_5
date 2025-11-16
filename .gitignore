@@ -1,0 +1,37 @@
+# .gitignore for Terraform / AWS project
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+crash.log
+crash.*
+terraform.tfstate.backup
+.terraform.lock.hcl
+
+# Local environment and secrets
+.env
+*.pem
+*.key
+*.crt
+*.p12
+credentials
+*.secret
+
+# IDEs and OS files
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+
+# Python
+__pycache__/
+
+# Notes:
+# - Do NOT commit AWS credentials or any sensitive keys. Remove them from tracked files
+#   before pushing if you accidentally committed secrets. Use the AWS credential file
+#   in your home directory ("%USERPROFILE%\\.aws\\credentials") or environment variables.

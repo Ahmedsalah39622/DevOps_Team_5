@@ -1,5 +1,4 @@
 
-
 terraform {
   required_providers {
     aws = {
@@ -25,9 +24,7 @@ data "aws_iot_endpoint" "iot" {
   endpoint_type = "iot:Data-ATS"
 }
 
-// -----------------------------
 // Kinesis Stream
-// -----------------------------
 resource "aws_kinesis_stream" "iot_data_stream" {
   name             = var.kinesis_stream_name
   shard_count      = var.kinesis_shard_count
@@ -38,7 +35,6 @@ resource "aws_kinesis_stream" "iot_data_stream" {
   })
 }
 
-// -----------------------------
 // IoT Thing + Certificate + Policy
 // -----------------------------
 resource "aws_iot_thing" "device" {
@@ -168,9 +164,6 @@ resource "aws_iot_topic_rule" "iot_to_kinesis" {
     partition_key = "$${topic()}"
   }
 
-  // Optional: you can add error actions or description blocks here
 }
 
-// -----------------------------
 // Tags or additional configuration can be added as needed
-// -----------------------------

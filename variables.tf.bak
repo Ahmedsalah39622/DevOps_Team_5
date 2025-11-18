@@ -1,0 +1,60 @@
+// Variables for Phase 1 Terraform configuration
+
+// Variables for Phase 1 Terraform configuration
+
+variable "aws_region" {
+  description = "AWS region to deploy into"
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "aws_profile" {
+  description = "AWS CLI profile to use (optional). Leave empty to use default credentials chain."
+  type        = string
+  default     = ""
+}
+
+variable "kinesis_stream_name" {
+  description = "Name of the Kinesis stream for IoT data"
+  type        = string
+  default     = "iot_data_stream"
+}
+
+variable "kinesis_shard_count" {
+  description = "Number of shards for the Kinesis stream"
+  type        = number
+  default     = 1
+}
+
+variable "kinesis_retention_hours" {
+  description = "Retention period in hours for Kinesis data"
+  type        = number
+  default     = 24
+}
+
+variable "iot_thing_name" {
+  description = "Name of the AWS IoT Thing"
+  type        = string
+  default     = "iot_device_1"
+}
+
+variable "iot_policy_name" {
+  description = "Name of the IoT policy to create"
+  type        = string
+  default     = "iot-device-policy"
+}
+
+variable "iot_kinesis_role_name" {
+  description = "IAM role name for IoT to write to Kinesis"
+  type        = string
+  default     = "iot-kinesis-role"
+}
+
+variable "common_tags" {
+  description = "Common tags applied to resources"
+  type        = map(string)
+  default = {
+    Project = "iot-pipeline"
+    Phase   = "phase-1"
+  }
+}

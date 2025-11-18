@@ -1,4 +1,3 @@
-
 terraform {
   required_providers {
     aws = {
@@ -96,10 +95,7 @@ resource "aws_iot_policy_attachment" "attach_policy" {
   target = aws_iot_certificate.device_cert.arn
 }
 
-// -----------------------------
-// IAM role & policy for IoT Topic Rule -> Kinesis
-// IoT needs an IAM role that it can assume in order to write to Kinesis.
-// -----------------------------
+
 resource "aws_iam_role" "iot_kinesis_role" {
   name = var.iot_kinesis_role_name
 

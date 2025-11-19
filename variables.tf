@@ -1,4 +1,4 @@
-// Variables for Phase 1 Terraform configuration
+// Variables for Phase 1 Terraform implementation (base AWS infrastructure)
 
 variable "aws_region" {
   description = "AWS region to deploy into"
@@ -7,52 +7,58 @@ variable "aws_region" {
 }
 
 variable "aws_profile" {
-  description = "AWS CLI profile to use (optional). Leave empty to use default credentials chain."
+  description = "Optional AWS CLI profile to use; leave empty to use default credentials chain"
   type        = string
   default     = ""
 }
 
-variable "kinesis_stream_name" {
-  description = "Name of the Kinesis stream for IoT data"
+variable "project_short" {
+  description = "Short project identifier used in resource names"
   type        = string
-  default     = "iot_data_stream"
+  default     = "scops"
 }
 
-variable "kinesis_shard_count" {
-  description = "Number of shards for the Kinesis stream"
-  type        = number
-  default     = 1
-}
-
-variable "kinesis_retention_hours" {
-  description = "Retention period in hours for Kinesis data"
-  type        = number
-  default     = 24
-}
-
-variable "iot_thing_name" {
-  description = "Name of the AWS IoT Thing"
+variable "vpc_name" {
+  description = "Human-friendly VPC name"
   type        = string
-  default     = "iot_device_1"
+  default     = "scops-vpc"
 }
 
-variable "iot_policy_name" {
-  description = "Name of the IoT policy to create"
+variable "vpc_cidr" {
+  description = "CIDR block for the VPC"
   type        = string
-  default     = "iot-device-policy"
+  default     = "10.0.0.0/16"
 }
 
-variable "iot_kinesis_role_name" {
-  description = "IAM role name for IoT to write to Kinesis"
+variable "public_subnets" {
+  description = "List of CIDR blocks for public subnets (one per AZ)"
+  type        = list(string)
+  default     = ["10.0.0.0/24", "10.0.1.0/24"]
+}
+
+variable "private_subnets" {
+  description = "List of CIDR blocks for private subnets (one per AZ). These are isolated by default to avoid NAT costs."
+  type        = list(string)
+  default     = ["10.0.100.0/24", "10.0.101.0/24"]
+}
+
+variable "allowed_ssh_cidr" {
+  description = "CIDR allowed to SSH to bastion; set to your office/home IP (default is 0.0.0.0/0 - change it)"
   type        = string
-  default     = "iot-kinesis-role"
+  default     = "0.0.0.0/0"
+}
+
+variable "artifact_bucket_name" {
+  description = "S3 bucket name for CI/CD artifacts. Choose a globally unique name. Leave empty to auto-generate."
+  type        = string
+  default     = ""
 }
 
 variable "common_tags" {
-  description = "Common tags applied to resources"
+  description = "Common tags to apply to resources"
   type        = map(string)
   default = {
-    Project = "iot-pipeline"
+    Project = "smart-cityops"
     Phase   = "phase-1"
   }
 }

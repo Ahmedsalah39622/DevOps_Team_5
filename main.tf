@@ -1,165 +1,163 @@
+// Phase 1: Basic AWS networking and minimal IAM roles for Smart CityOps
+// - VPC with public & private subnets
+// - Internet Gateway + public route table
+// - Security Groups (bastion and internal)
+// - Minimal IAM roles (EC2 role for SSM, CI role for future CI/CD)
+// This configuration prefers low-cost choices (no NAT Gateway) and leaves
+// private subnets isolated (no outbound internet) to avoid recurring charges.
+
+resource "aws_vpc" "this" {
+  cidr_block           = var.vpc_cidr
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+  tags                 = merge(var.common_tags, { Name = var.vpc_name })
+}
+
+resource "aws_subnet" "public" {
+  count                   = length(var.public_subnets)
+  vpc_id                  = aws_vpc.this.id
+  cidr_block              = var.public_subnets[count.index]
+  map_public_ip_on_launch = true
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  tags                    = merge(var.common_tags, { Name = "${var.vpc_name}-public-${count.index}" })
+}
+
+resource "aws_subnet" "private" {
+  count             = length(var.private_subnets)
+  vpc_id            = aws_vpc.this.id
+  cidr_block        = var.private_subnets[count.index]
+  availability_zone = data.aws_availability_zones.available.names[count.index]
+  tags              = merge(var.common_tags, { Name = "${var.vpc_name}-private-${count.index}" })
+}
+
+resource "aws_internet_gateway" "this" {
+  vpc_id = aws_vpc.this.id
+  tags   = merge(var.common_tags, { Name = "${var.vpc_name}-igw" })
+}
+
+data "aws_availability_zones" "available" {}
+
 terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = ">= 4.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.0.0"
+    }
   }
   required_version = ">= 1.1.0"
 }
 
-provider "aws" {
-  region = var.aws_region
-  # Use the profile if provided; otherwise set to null so the provider
-  # falls back to the default credentials chain (env vars, instance role, etc).
-  profile = var.aws_profile != "" ? var.aws_profile : null
+
+
+// Internal SG for application resources - allow traffic from within the VPC
+resource "aws_security_group" "internal" {
+  name   = "${var.vpc_name}-internal-sg"
+  vpc_id = aws_vpc.this.id
+
+  description = "Allow internal communication within the VPC"
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [aws_vpc.this.cidr_block]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(var.common_tags, { Name = "${var.vpc_name}-internal-sg" })
 }
 
-// Basic data sources
-data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
-data "aws_iot_endpoint" "iot" {
-  // returns the account-specific IoT Data endpoint (Data-ATS recommended)
-  endpoint_type = "iot:Data-ATS"
-}
-
-// Kinesis Stream
-resource "aws_kinesis_stream" "iot_data_stream" {
-  name             = var.kinesis_stream_name
-  shard_count      = var.kinesis_shard_count
-  retention_period = var.kinesis_retention_hours
-
-  tags = merge(var.common_tags, {
-    Name = var.kinesis_stream_name
-  })
-}
-
-// IoT Thing + Certificate + Policy
 // -----------------------------
-resource "aws_iot_thing" "device" {
-  name = var.iot_thing_name
-  // optional attributes can be added here
-}
+// Minimal IAM Roles for future services
+//  - EC2 role with SSM access (for management and future agents)
+//  - CI role (CodeBuild) with minimal S3 read/write to store artifacts
+// -----------------------------
+resource "aws_iam_role" "ec2_ssm_role" {
+  name = "${var.project_short}-ec2-ssm-role"
 
-// Create an X.509 certificate for the device. This resource registers a certificate
-// in AWS IoT. The certificate material is returned and may be used out-of-band to
-// provision devices. We enable it by default.
-resource "aws_iot_certificate" "device_cert" {
-  active = true
-}
-
-// Attach the certificate as a principal to the IoT Thing
-resource "aws_iot_thing_principal_attachment" "attach_cert" {
-  # Newer provider versions expect `thing` (not `thing_name`).
-  thing     = aws_iot_thing.device.name
-  principal = aws_iot_certificate.device_cert.arn
-}
-
-// IoT Policy allowing device to connect and publish to the expected topic(s).
-resource "aws_iot_policy" "device_policy" {
-  name   = var.iot_policy_name
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iot:Connect"
-      ],
-      "Resource": [
-        "arn:aws:iot:${var.aws_region}:${data.aws_caller_identity.current.account_id}:client/*"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iot:Publish",
-        "iot:Subscribe",
-        "iot:Receive"
-      ],
-      "Resource": [
-        "arn:aws:iot:${var.aws_region}:${data.aws_caller_identity.current.account_id}:topic/iot/topic/data",
-        "arn:aws:iot:${var.aws_region}:${data.aws_caller_identity.current.account_id}:topicfilter/iot/topic/data"
-      ]
-    }
-  ]
-}
-POLICY
-}
-
-// Attach the IoT Policy to the certificate so the device can use it
-resource "aws_iot_policy_attachment" "attach_policy" {
-  # Provider expects `policy` (policy name) and `target` (principal ARN)
-  policy = aws_iot_policy.device_policy.name
-  target = aws_iot_certificate.device_cert.arn
-}
-
-
-resource "aws_iam_role" "iot_kinesis_role" {
-  name = var.iot_kinesis_role_name
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "iot.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
-
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action    = "sts:AssumeRole",
+      Effect    = "Allow",
+      Principal = { Service = "ec2.amazonaws.com" }
+    }]
+  })
   tags = var.common_tags
 }
 
-resource "aws_iam_role_policy" "iot_kinesis_policy" {
-  name = "${var.iot_kinesis_role_name}-policy"
-  role = aws_iam_role.iot_kinesis_role.id
+resource "aws_iam_role_policy_attachment" "ec2_ssm_attach" {
+  role       = aws_iam_role.ec2_ssm_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role" "ci_role" {
+  name = "${var.project_short}-ci-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action    = "sts:AssumeRole",
+      Effect    = "Allow",
+      Principal = { Service = "codebuild.amazonaws.com" }
+    }]
+  })
+  tags = var.common_tags
+}
+
+resource "aws_iam_role_policy_attachment" "ci_s3_read_attach" {
+  role       = aws_iam_role.ci_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+}
+
+// Lightweight inline policy for CI to allow uploading artifacts to a specific S3 prefix
+resource "aws_iam_policy" "ci_artifact_policy" {
+  name        = "${var.project_short}-ci-artifacts"
+  description = "Allow CI to put objects into project artifacts prefix (minimal)"
 
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
       {
         Effect = "Allow",
-        Action = [
-          "kinesis:PutRecord",
-          "kinesis:PutRecords"
-        ],
+        Action = ["s3:PutObject", "s3:GetObject", "s3:ListBucket"],
         Resource = [
-          aws_kinesis_stream.iot_data_stream.arn
+          "arn:aws:s3:::${var.artifact_bucket_name}",
+          "arn:aws:s3:::${var.artifact_bucket_name}/*"
         ]
       }
     ]
   })
 }
 
-// -----------------------------
-// IoT Topic Rule: read from MQTT topic and forward to Kinesis
-// SQL: SELECT * FROM 'iot/topic/data'
-// -----------------------------
-resource "aws_iot_topic_rule" "iot_to_kinesis" {
-  name        = "iot_to_kinesis_rule"
-  description = "Forward IoT device messages on 'iot/topic/data' to Kinesis stream"
-  enabled     = true
+resource "aws_iam_policy_attachment" "ci_artifacts_attach" {
+  name       = "${var.project_short}-ci-artifacts-attach"
+  roles      = [aws_iam_role.ci_role.name]
+  policy_arn = aws_iam_policy.ci_artifact_policy.arn
+}
 
-  # `sql_version` is required in newer provider versions.
-  sql_version = "2016-03-23"
-  sql         = "SELECT * FROM 'iot/topic/data'"
+// Optionally create a small S3 bucket for artifacts (versioning disabled by default)
+resource "aws_s3_bucket" "artifacts" {
+  bucket = var.artifact_bucket_name
 
-  // Kinesis action: IoT service will assume the role and write to the stream.
-  kinesis {
-    role_arn    = aws_iam_role.iot_kinesis_role.arn
-    stream_name = aws_kinesis_stream.iot_data_stream.name
-    // Use IoT SQL expression for partition key. We escape Terraform interpolation
-    // so the IoT service evaluates the expression at runtime.
-    partition_key = "$${topic()}"
+  tags = merge(var.common_tags, { Name = "${var.project_short}-artifacts" })
+
+  lifecycle_rule {
+    enabled = true
   }
 
 }
 
-// Tags or additional configuration can be added as needed
+// IoT Thing + Certificate + Policy
+// -----------------------------
+

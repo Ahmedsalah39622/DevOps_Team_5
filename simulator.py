@@ -2,7 +2,7 @@
 Smart CityOps Phase 2: IoT Sensor Simulator
 Simulates Traffic, Pollution, and Weather sensors.
 Sends JSON data to console or via HTTP POST to a local backend.
-
+Testing
 How to add more sensors or change interval:
 - Add a new class inheriting from BaseSensor or extend SENSOR_TYPES.
 - Change SEND_INTERVAL or NUM_SENSORS at the top of the file.

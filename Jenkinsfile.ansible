@@ -1,0 +1,23 @@
+pipeline {
+    agent any
+    environment {
+        ANSIBLE_HOST_KEY_CHECKING = 'False'
+    }
+    stages {
+        stage('Install Ansible Requirements') {
+            steps {
+                sh 'pip install --user ansible'
+            }
+        }
+        stage('Run Ansible Playbook') {
+            steps {
+                sh 'ansible-playbook -i ansible/inventory ansible/playbook.yml'
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Ensure Nexus EC2 is t3.micro and only required ports (8081, 8082) are open.'
+        }
+    }
+}

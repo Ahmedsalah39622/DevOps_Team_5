@@ -1,0 +1,23 @@
+pipeline {
+    agent any
+    environment {
+        KUBECONFIG = credentials('eks-kubeconfig')
+    }
+    stages {
+        stage('Apply Kubernetes Manifests') {
+            steps {
+                sh 'kubectl apply -f k8s/'
+            }
+        }
+        stage('Scale Down When Idle') {
+            steps {
+                echo 'Consider scaling EKS node group to 1 node or 0 when not in use to save costs.'
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Kubernetes deployment complete. Remember to scale down EKS when idle.'
+        }
+    }
+}

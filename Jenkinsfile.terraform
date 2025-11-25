@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+    environment {
+        AWS_DEFAULT_REGION = 'us-east-1'
+    }
+    stages {
+        stage('Terraform Init') {
+            steps {
+                sh 'terraform init'
+            }
+        }
+        stage('Terraform Plan') {
+            steps {
+                sh 'terraform plan -out=tfplan'
+            }
+        }
+        stage('Terraform Apply') {
+            when {
+                expression { return params.APPLY_INFRA }
+            }
+            steps {
+                sh 'terraform apply -auto-approve tfplan'
+            }
+        }
+        stage('Cleanup Unused Resources') {
+            steps {
+                echo 'Review and manually destroy unused resources to save costs.'
+            }
+        }
+    }
+    parameters {
+        booleanParam(name: 'APPLY_INFRA', defaultValue: false, description: 'Apply infrastructure changes?')
+    }
+    post {
+        always {
+            echo 'Remember to destroy test resources when not needed to minimize AWS costs.'
+        }
+    }
+}

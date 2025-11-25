@@ -1,14 +1,88 @@
-Phase 1 — Terraform (IoT → Kinesis)
 
-This README contains quick, copy-pasteable instructions to install Terraform on Windows, verify the AWS CLI, and run the Terraform configuration in this folder.
+# Smart CityOps DevOps Final Project
 
-Location of Terraform files
+## Project Idea
+Smart CityOps is a full-stack, cloud-native DevOps project simulating a smart city IoT data flow and management platform. It demonstrates modern DevOps practices using AWS, Terraform, Jenkins, Ansible, Docker, Nexus, and Kubernetes (EKS). The project includes:
 
-- `d:\Depi DevOps Project\main.tf`
-- `d:\Depi DevOps Project\variables.tf`
-- `d:\Depi DevOps Project\outputs.tf`
+- Infrastructure as Code (Terraform)
+- Configuration Management (Ansible)
+- CI/CD Automation (Jenkins)
+- Containerization (Docker)
+- Kubernetes Deployment (EKS)
+- Nexus Repository for images
+- Application Deployment (Frontend + Backend + Database)
 
-1) Install Terraform (choose one)
+## What Has Been Built (Base)
+- AWS VPC, subnets, security groups, IAM roles
+- ECS backend running on public IP
+- IoT Simulators (Python)
+- Backend Python API (Dockerized)
+
+## Current DevOps Architecture
+### Infrastructure (Terraform)
+- VPC, public/private subnets, security groups
+- Internet Gateway, Route Tables
+- EKS cluster (1–2 nodes, spot if possible, free-tier where possible)
+- EC2 instance (t3.micro) for Nexus
+- IAM roles for EKS, EC2, and nodes
+- Modular Terraform structure
+
+### Configuration Management (Ansible)
+- Playbook to install and configure Nexus on EC2 (t3.micro)
+- Opens only required ports (8081, 8082)
+
+### CI/CD Pipelines (Jenkins)
+Pipelines are defined as Jenkinsfiles:
+1. **Terraform Infrastructure Pipeline**: Provisions AWS resources with cost-saving settings
+2. **Ansible Nexus Automation Pipeline**: Configures Nexus on EC2
+3. **Docker Build & Push Pipeline (backend)**: Builds and pushes backend image to Nexus
+4. **Kubernetes Deploy to EKS Pipeline**: Deploys backend/frontend/database to EKS
+5. **Docker Build & Push Pipeline (frontend)**: Builds and pushes frontend image to Nexus
+
+### Application
+- Backend: Python API (Dockerized, ECS now, EKS planned)
+- Frontend: React or HTML/JS (Dockerized)
+- Database: PostgreSQL or MySQL (inside EKS)
+
+### Nexus Repository
+- Hosted on EC2 (t3.micro), managed by Ansible
+- Stores Docker images for backend and frontend
+
+### Kubernetes (EKS)
+- Manifests for backend, frontend, and database deployments/services
+- Uses images from Nexus private registry
+- ConfigMaps, Secrets, Ingress/LoadBalancer
+
+### Cost Optimization
+- All EC2/EKS use smallest instance types (t3.micro)
+- EKS node group: 1–2 nodes, spot if possible
+- Free-tier resources and regions
+- Cleanup steps and reminders in pipelines
+
+## How to Run the Project
+1. Install Jenkins and set up pipeline jobs for each Jenkinsfile in this repo
+2. Run pipelines in this order:
+   1. Terraform Infrastructure Pipeline
+   2. Ansible Nexus Automation Pipeline
+   3. Docker Build & Push Pipeline (backend)
+   4. Kubernetes Deploy to EKS Pipeline
+   5. Docker Build & Push Pipeline (frontend)
+3. Monitor each pipeline for success before starting the next
+4. Clean up unused resources to minimize AWS costs
+
+## Location of Key Files
+- `main.tf`, `variables.tf`, `outputs.tf` — Terraform infrastructure
+- `Jenkinsfile.terraform` — Terraform pipeline
+- `Jenkinsfile.ansible` — Ansible Nexus pipeline
+- `Jenkinsfile.docker-backend` — Backend Docker pipeline
+- `Jenkinsfile.k8s-deploy` — Kubernetes deploy pipeline
+- `Jenkinsfile.docker-frontend` — Frontend Docker pipeline
+- `ansible/playbook.yml`, `ansible/inventory` — Ansible Nexus setup
+- `k8s/` — Kubernetes manifests
+
+## Quickstart: Terraform (for reference)
+
+Install Terraform (choose one):
 
 - Using winget (recommended if available):
 
@@ -43,13 +117,13 @@ If you received the error "Access to the path 'C:\ProgramData\chocolatey\lib-bad
     # Open a NEW PowerShell session and run:
     terraform -v
 
-2) Verify AWS CLI and credentials
+Verify AWS CLI and credentials:
 
     aws --version
     aws configure
     aws configure list --profile default
 
-3) Run Terraform in this project folder
+Run Terraform in this project folder:
 
     Set-Location 'D:\Depi DevOps Project'
     terraform init
@@ -58,31 +132,23 @@ If you received the error "Access to the path 'C:\ProgramData\chocolatey\lib-bad
 
 If you're using a named AWS profile for credentials, either set the environment variable for the session or pass the variable when running Terraform:
 
+
     $env:AWS_PROFILE = 'your-profile'
     terraform plan
 
     # Or pass as Terraform variable
     terraform plan -var "aws_profile=your-profile" -out=tfplan
 
-4) Troubleshooting notes
+## Troubleshooting
 
 - `terraform` not recognized: reinstall via winget/choco or ensure the folder with `terraform.exe` is on your PATH and restart PowerShell.
 - Chocolatey permission errors: make sure you run the `choco` command in an elevated PowerShell session. If permission issues persist, fix ownership/permissions as shown above.
 - Long PATH issues: prefer editing PATH via Windows System UI or the `[Environment]::SetEnvironmentVariable` approach above.
 
-5) After apply — useful commands
+## After Terraform Apply — Useful Commands
 
     Set-Location 'D:\Depi DevOps Project'
-    terraform output kinesis_stream_name
-    terraform output kinesis_stream_arn
-    terraform output iot_endpoint_address
-    terraform output iot_thing_name
-    terraform output iot_certificate_arn
-    terraform output iot_certificate_id
-
-6) Want me to do more?
-
-- I can add a `terraform.tfvars.example` or create a CI job to run `terraform fmt` and `terraform validate` for this repo.
+    terraform output
 
 ---
-Generated to help run the Phase 1 Terraform deployment.
+This README is up to date with the Smart CityOps DevOps project as of November 2025.

@@ -157,10 +157,22 @@ resource "aws_s3_bucket" "artifacts" {
 
   tags = merge(var.common_tags, { Name = "${var.project_short}-artifacts" })
 
-  lifecycle_rule {
-    enabled = true
-  }
+  # Lifecycle configuration moved to aws_s3_bucket_lifecycle_configuration below
 
+}
+
+# S3 bucket lifecycle configuration (replaces deprecated lifecycle_rule)
+resource "aws_s3_bucket_lifecycle_configuration" "artifacts_lifecycle" {
+  bucket = aws_s3_bucket.artifacts.id
+
+  rule {
+    id     = "expire-artifacts"
+    status = "Enabled"
+
+    expiration {
+      days = 30 # Example: expire objects after 30 days
+    }
+  }
 }
 
 // IoT Thing + Certificate + Policy

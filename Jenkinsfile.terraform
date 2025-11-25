@@ -6,12 +6,12 @@ pipeline {
     stages {
         stage('Terraform Init') {
             steps {
-                sh 'terraform init'
+                bat 'terraform init'
             }
         }
         stage('Terraform Plan') {
             steps {
-                sh 'terraform plan -out=tfplan'
+                bat 'terraform plan -out=tfplan'
             }
         }
         stage('Terraform Apply') {
@@ -19,7 +19,7 @@ pipeline {
                 expression { return params.APPLY_INFRA }
             }
             steps {
-                sh 'terraform apply -auto-approve tfplan'
+                bat 'terraform apply -auto-approve tfplan'
             }
         }
         stage('Cleanup Unused Resources') {

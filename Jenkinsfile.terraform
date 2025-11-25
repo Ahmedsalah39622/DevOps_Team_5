@@ -6,12 +6,22 @@ pipeline {
     stages {
         stage('Terraform Init') {
             steps {
-                bat 'terraform init'
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    bat 'terraform init'
+                }
             }
         }
         stage('Terraform Plan') {
             steps {
-                bat 'terraform plan -out=tfplan'
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    bat 'terraform plan -out=tfplan'
+                }
             }
         }
         stage('Terraform Apply') {
@@ -19,7 +29,12 @@ pipeline {
                 expression { return params.APPLY_INFRA }
             }
             steps {
-                bat 'terraform apply -auto-approve tfplan'
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    bat 'terraform apply -auto-approve tfplan'
+                }
             }
         }
         stage('Cleanup Unused Resources') {

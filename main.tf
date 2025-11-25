@@ -6,6 +6,11 @@
 // This configuration prefers low-cost choices (no NAT Gateway) and leaves
 // private subnets isolated (no outbound internet) to avoid recurring charges.
 
+provider "aws" {
+  region  = var.aws_region
+  profile = var.aws_profile
+}
+
 resource "aws_vpc" "this" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true

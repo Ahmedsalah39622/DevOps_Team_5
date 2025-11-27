@@ -1,0 +1,5 @@
+@"
+#!/bin/bash
+set -o xtrace
+/etc/eks/bootstrap.sh scops-cluster --kubelet-extra-args '--node-labels=eks.amazonaws.com/nodegroup=manual-nodes'
+"@ > userdata.txt

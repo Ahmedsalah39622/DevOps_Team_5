@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scops-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scops-backend
+  template:
+    metadata:
+      labels:
+        app: scops-backend
+    spec:
+      containers:
+      - name: scops-backend
+        image: 768693789298.dkr.ecr.us-east-1.amazonaws.com/scops-backend:latest
+        ports:
+        - containerPort: 80
+      - name: scops-backend
+        image: 768693789298.dkr.ecr.us-east-1.amazonaws.com/scops-backend:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: mapUsers
+          value: |
+            - userarn: arn:aws:iam::768693789298:user/terraform-admin
+              username: terraform-admin
+              groups:
+                - system:masters

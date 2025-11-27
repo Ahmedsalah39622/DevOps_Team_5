@@ -5,8 +5,12 @@ metadata:
   namespace: kube-system
 data:
   mapRoles: |
-    - rolearn: arn:aws:iam::768693789298:role/AmazonEKSAutoClusterRole
-      username: eks-admin
+    - rolearn: arn:aws:iam::768693789298:role/terraform-admin
+      username: terraform-admin
       groups:
         - system:masters
-    # keep existing entries if present
+  mapUsers: |
+    - userarn: arn:aws:iam::768693789298:user/terraform-admin
+      username: terraform-admin
+      groups:
+        - system:masters

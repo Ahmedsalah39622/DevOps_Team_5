@@ -55,7 +55,7 @@ def insert_generated_data():
         except Exception as e:
             print(f"DB insert failed: {e}")
 
-        time.sleep(60)  # Wait 1 minute before next insert
+        time.sleep(5)  # Wait 5 seconds before next insert
 
 if __name__ == "__main__":
     insert_generated_data()

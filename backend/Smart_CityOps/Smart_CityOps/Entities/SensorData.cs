@@ -1,19 +1,21 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Smart_CityOps.Entities
 {
-        public class SensorData
-        {
-            [JsonPropertyName("sensor_id")]
-            public string SensorId { get; set; }
+    [Table("sensor_data", Schema = "dbo")]
+    public class SensorData
+    {
+        [Key]
+        public int Id { get; set; }
 
-            [JsonPropertyName("type")]
-            public string Type { get; set; }
+        [Column("type")]
+        public string? Type { get; set; }
 
-            [JsonPropertyName("value")]
-            public double Value { get; set; }
+        [Column("value")]
+        public string? Value { get; set; }
 
-            [JsonPropertyName("timestamp")]
-            public DateTime Timestamp { get; set; }
-        }
+        [Column("timestamp")]
+        public string? Timestamp { get; set; }
+    }
 }

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Smart_CityOps.Data;
 using Smart_CityOps.Models;
+using Smart_CityOps.Entities;
 using System.Text;
 
 namespace Smart_CityOps
@@ -15,7 +16,10 @@ namespace Smart_CityOps
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("localConnection")));
+
+            builder.Services.AddDbContext<SmartCityContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("ServerConnection")));
 
             builder.Services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
@@ -51,8 +55,12 @@ namespace Smart_CityOps
                 var services = scope.ServiceProvider;
                 try
                 {
-                    var context = services.GetRequiredService<AppDbContext>();
-                    context.Database.Migrate();
+                    // FIXED: Use EnsureCreated() instead of Migrate() to avoid pending migration errors on local DB
+                    var identityContext = services.GetRequiredService<AppDbContext>();
+                    identityContext.Database.EnsureCreated();
+
+                    var dataContext = services.GetRequiredService<SmartCityContext>();
+                    // dataContext.Database.Migrate(); 
 
                     var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
@@ -60,10 +68,9 @@ namespace Smart_CityOps
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("An error occurred during database migration or seeding: " + ex.Message);
+                    Console.WriteLine(ex.Message);
                 }
             }
-
 
             app.UseHttpsRedirection();
             app.UseAuthentication();

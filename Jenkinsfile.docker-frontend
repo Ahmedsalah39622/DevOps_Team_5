@@ -11,9 +11,7 @@ pipeline {
         }
         stage('Login to Nexus Docker Registry') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'nexus-docker', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
-                    sh 'echo $NEXUS_PASS | docker login nexus.local:8082 -u $NEXUS_USER --password-stdin'
-                }
+                sh 'echo 123 | docker login nexus.local:8082 -u admin --password-stdin'
             }
         }
         stage('Push Frontend Image to Nexus') {

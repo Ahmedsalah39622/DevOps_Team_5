@@ -17,5 +17,8 @@ namespace Smart_CityOps.Entities
 
         [Column("timestamp")]
         public string? Timestamp { get; set; }
+
+        [Column("sensor_id")]
+        public string? Sensor_id { get; set; }
     }
 }

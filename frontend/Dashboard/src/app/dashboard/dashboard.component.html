@@ -1,0 +1,144 @@
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <div class="header-title">
+      <h1>City Monitor</h1>
+      <span class="badge live-badge">LIVE</span>
+    </div>
+    <div class="header-actions">
+      <button (click)="logout()" class="logout-btn">Logout</button>
+    </div>
+  </header>
+
+  <!-- Insights -->
+  <div class="stats-grid" *ngIf="stats">
+    <div
+      class="card stat-card"
+      [ngClass]="getPollutionClass(stats.insights.airQuality.status)"
+    >
+      <div class="card-icon">🌫️</div>
+      <div class="card-content">
+        <h3>Air Quality</h3>
+        <div class="stat-main">{{ stats.insights.airQuality.status }}</div>
+        <div class="stat-sub">
+          Avg AQI: {{ stats.insights.airQuality.average }}
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="card stat-card"
+      [ngClass]="getTrafficClass(stats.insights.traffic.status)"
+    >
+      <div class="card-icon">🚦</div>
+      <div class="card-content">
+        <h3>Traffic</h3>
+        <div class="stat-main">{{ stats.insights.traffic.status }}</div>
+        <div class="stat-sub">Avg: {{ stats.insights.traffic.average }}</div>
+      </div>
+    </div>
+
+    <div class="card stat-card card-info">
+      <div class="card-icon">🌡️</div>
+      <div class="card-content">
+        <h3>Weather</h3>
+        <div class="stat-main" *ngIf="weatherData">
+          {{ weatherData.temperature }}°C
+        </div>
+        <div class="stat-sub" *ngIf="weatherData">
+          H: {{ weatherData.humidity }}%
+        </div>
+      </div>
+    </div>
+
+    <div class="card stat-card card-neutral">
+      <div class="card-icon">📡</div>
+      <div class="card-content">
+        <h3>System</h3>
+        <div class="stat-main">
+          {{ stats.insights.systemHealth.activeSensors }}
+        </div>
+        <div class="stat-sub">Active Sensors</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar card">
+    <div class="filter-group">
+      <label>Type</label>
+      <select [(ngModel)]="filterType" (change)="applyFilters()">
+        <option value="All">All Types</option>
+        <option value="traffic">Traffic</option>
+        <option value="pollution">Pollution</option>
+        <option value="weather">Weather</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Sensor ID</label>
+      <input
+        type="text"
+        [(ngModel)]="filterSensorId"
+        (keyup.enter)="applyFilters()"
+        placeholder="Search ID..."
+      />
+    </div>
+
+    <div class="filter-group">
+      <label>From</label>
+      <input type="datetime-local" [(ngModel)]="customStart" />
+    </div>
+
+    <div class="filter-group">
+      <label>To</label>
+      <input type="datetime-local" [(ngModel)]="customEnd" />
+    </div>
+
+    <button (click)="applyFilters()" class="refresh-btn">Search</button>
+  </div>
+
+  <!-- Table -->
+  <div class="data-section card">
+    <div class="section-header">
+      <h2>Latest Data Feed</h2>
+      <span class="limit-badge">Limit: Top 1000 Rows</span>
+    </div>
+
+    <div *ngIf="isLoading" class="loading">Loading records...</div>
+
+    <table class="data-table" *ngIf="!isLoading">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Sensor ID</th>
+          <th>Type</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of sensorHistory">
+          <td class="time-col">
+            {{ row.timestamp | date : "MMM d, h:mm:ss a" }}
+          </td>
+          <td>
+            <span class="badge id-badge">{{ row.sensor_id }}</span>
+          </td>
+          <td>
+            <span class="badge type-badge" [ngClass]="row.type">{{
+              row.type
+            }}</span>
+          </td>
+          <td>
+            <span *ngIf="row.type === 'weather'">
+              T: {{ row.parsedValue?.temperature }}° H:
+              {{ row.parsedValue?.humidity }}%
+            </span>
+            <span *ngIf="row.type !== 'weather'" class="value-text">
+              {{ row.parsedValue }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

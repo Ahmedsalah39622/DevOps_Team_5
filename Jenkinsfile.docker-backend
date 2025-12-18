@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('Build Backend Docker Image') {
             steps {
-                sh 'docker build -t nexus.local:8082/backend:latest -f Dockerfile .'
+                bat 'docker build -t nexus.local:8082/backend:latest -f Dockerfile .'
             }
         }
         stage('Login to Nexus Docker Registry') {

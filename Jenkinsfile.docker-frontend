@@ -6,22 +6,22 @@ pipeline {
     stages {
         stage('Build Frontend Docker Image') {
             steps {
-                sh 'docker build -t localhost:8082/frontend:latest -f Dockerfile.frontend .'
+                bat 'docker build -t localhost:8082/frontend:latest -f Dockerfile.frontend .'
             }
         }
         stage('Login to Nexus Docker Registry') {
             steps {
-                sh 'echo 123 | docker login localhost:8082 -u admin --password-stdin'
+                bat 'echo 123 | docker login localhost:8082 -u admin --password-stdin'
             }
         }
         stage('Push Frontend Image to Nexus') {
             steps {
-                sh 'docker push localhost:8082/frontend:latest'
+                bat 'docker push localhost:8082/frontend:latest'
             }
         }
         stage('Cleanup Local Docker Images') {
             steps {
-                sh 'docker rmi localhost:8082/frontend:latest || true'
+                bat 'docker rmi localhost:8082/frontend:latest || true'
             }
         }
     }

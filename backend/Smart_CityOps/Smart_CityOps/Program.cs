@@ -97,21 +97,23 @@ namespace Smart_CityOps
 
         private static async Task SeedData(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
-            // Remove all users
-            var allUsers = userManager.Users.ToList();
-            foreach (var user in allUsers)
-            {
-                await userManager.DeleteAsync(user);
-            }
-
             // Ensure roles exist
             if (!await roleManager.RoleExistsAsync(UserRoles.Admin))
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
 
-            // Create a single new user
-            var newUser = new IdentityUser { UserName = "admin", SecurityStamp = Guid.NewGuid().ToString() };
-            await userManager.CreateAsync(newUser, "Admin@123");
-            await userManager.AddToRoleAsync(newUser, UserRoles.Admin);
+            // Check if the admin user exists
+            var adminUser = await userManager.FindByNameAsync("admin");
+            if (adminUser == null)
+            {
+                var newUser = new IdentityUser { UserName = "admin", SecurityStamp = Guid.NewGuid().ToString() };
+                await userManager.CreateAsync(newUser, "Admin@123");
+                await userManager.AddToRoleAsync(newUser, UserRoles.Admin);
+                Console.WriteLine("Seeded admin user with password: Admin@123");
+            }
+            else
+            {
+                Console.WriteLine("Admin user already exists. No changes made.");
+            }
         }
     }
 }

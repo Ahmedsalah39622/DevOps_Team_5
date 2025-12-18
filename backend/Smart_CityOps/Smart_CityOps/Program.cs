@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Smart_CityOps.Data;
 using Smart_CityOps.Models;
-using Smart_CityOps.Entities;
 using System.Text;
 
 namespace Smart_CityOps
@@ -15,16 +14,19 @@ namespace Smart_CityOps
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Database Contexts
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("localConnection")));
 
             builder.Services.AddDbContext<SmartCityContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("ServerConnection")));
 
+            // Identity Configuration
             builder.Services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
+            // Authentication Configuration
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -45,22 +47,31 @@ namespace Smart_CityOps
                 };
             });
 
+            // UPDATED: CORS Policy to allow any origin
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyHeader()
+                               .AllowAnyMethod();
+                    });
+            });
+
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
 
             var app = builder.Build();
 
+            // Seed Data
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
                 try
                 {
-                    // FIXED: Use EnsureCreated() instead of Migrate() to avoid pending migration errors on local DB
                     var identityContext = services.GetRequiredService<AppDbContext>();
                     identityContext.Database.EnsureCreated();
-
-                    var dataContext = services.GetRequiredService<SmartCityContext>();
-                    // dataContext.Database.Migrate(); 
 
                     var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
@@ -73,6 +84,10 @@ namespace Smart_CityOps
             }
 
             app.UseHttpsRedirection();
+
+            // UPDATED: Use the "AllowAll" policy
+            app.UseCors("AllowAll");
+
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();

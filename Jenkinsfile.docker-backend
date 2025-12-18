@@ -6,22 +6,22 @@ pipeline {
     stages {
         stage('Build Backend Docker Image') {
             steps {
-                bat 'docker build -t nexus.local:8082/backend:latest -f Dockerfile .'
+                bat 'docker build -t localhost:8082/backend:latest -f Dockerfile .'
             }
         }
         stage('Login to Nexus Docker Registry') {
             steps {
-                bat 'echo 123 | docker login nexus.local:8082 -u admin --password-stdin'
+                bat 'echo 123 | docker login localhost:8082 -u admin --password-stdin'
             }
         }
         stage('Push Backend Image to Nexus') {
             steps {
-                bat 'docker push nexus.local:8082/backend:latest'
+                bat 'docker push localhost:8082/backend:latest'
             }
         }
         stage('Cleanup Local Docker Images') {
             steps {
-                bat 'docker rmi nexus.local:8082/backend:latest || exit 0'
+                bat 'docker rmi localhost:8082/backend:latest || exit 0'
             }
         }
     }

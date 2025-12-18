@@ -97,24 +97,21 @@ namespace Smart_CityOps
 
         private static async Task SeedData(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
+            // Remove all users
+            var allUsers = userManager.Users.ToList();
+            foreach (var user in allUsers)
+            {
+                await userManager.DeleteAsync(user);
+            }
+
+            // Ensure roles exist
             if (!await roleManager.RoleExistsAsync(UserRoles.Admin))
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
-            if (!await roleManager.RoleExistsAsync(UserRoles.User))
-                await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
 
-            if (await userManager.FindByNameAsync("admin") == null)
-            {
-                var adminUser = new IdentityUser { UserName = "admin", SecurityStamp = Guid.NewGuid().ToString() };
-                await userManager.CreateAsync(adminUser, "Admin@123");
-                await userManager.AddToRoleAsync(adminUser, UserRoles.Admin);
-            }
-
-            if (await userManager.FindByNameAsync("default") == null)
-            {
-                var defaultUser = new IdentityUser { UserName = "default", SecurityStamp = Guid.NewGuid().ToString() };
-                await userManager.CreateAsync(defaultUser, "User@123");
-                await userManager.AddToRoleAsync(defaultUser, UserRoles.User);
-            }
+            // Create a single new user
+            var newUser = new IdentityUser { UserName = "admin", SecurityStamp = Guid.NewGuid().ToString() };
+            await userManager.CreateAsync(newUser, "Admin@123");
+            await userManager.AddToRoleAsync(newUser, UserRoles.Admin);
         }
     }
 }

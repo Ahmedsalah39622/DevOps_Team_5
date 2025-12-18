@@ -11,17 +11,17 @@ pipeline {
         }
         stage('Login to Nexus Docker Registry') {
             steps {
-                sh 'echo 123 | docker login nexus.local:8082 -u admin --password-stdin'
+                bat 'echo 123 | docker login nexus.local:8082 -u admin --password-stdin'
             }
         }
         stage('Push Backend Image to Nexus') {
             steps {
-                sh 'docker push nexus.local:8082/backend:latest'
+                bat 'docker push nexus.local:8082/backend:latest'
             }
         }
         stage('Cleanup Local Docker Images') {
             steps {
-                sh 'docker rmi nexus.local:8082/backend:latest || true'
+                bat 'docker rmi nexus.local:8082/backend:latest || exit 0'
             }
         }
     }

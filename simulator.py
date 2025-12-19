@@ -14,11 +14,10 @@ import json
 from datetime import datetime
 import requests
 
-# Configuration
-NUM_SENSORS = 10           # Number of simulators (can be 10, 50, 100...)
-SEND_INTERVAL = 5          # Seconds between sends
-SEND_TO_HTTP = True        # Set True to send via HTTP POST
-HTTP_ENDPOINT = "http://localhost:5000/sensor-data"  # Local backend endpoint (replace with your backend URL)
+NUM_SENSORS = 10
+SEND_INTERVAL = 5
+SEND_TO_HTTP = True
+HTTP_ENDPOINT = "http://localhost:5000/sensor-data"
 
 SENSOR_TYPES = ["traffic", "pollution", "weather"]
 
@@ -40,17 +39,17 @@ class BaseSensor:
 
 class TrafficSensor(BaseSensor):
     def generate_value(self):
-        # Simulate congestion level (0-100)
+        
         return random.randint(0, 100)
 
 class PollutionSensor(BaseSensor):
     def generate_value(self):
-        # Simulate pollution index (0-500)
+        
         return random.randint(0, 500)
 
 class WeatherSensor(BaseSensor):
     def generate_value(self):
-        # Simulate temperature, humidity, wind speed
+        
         return {
             "temperature": round(random.uniform(-10, 40), 1),
             "humidity": round(random.uniform(10, 100), 1),
@@ -74,12 +73,6 @@ def send_data(data):
     else:
         print(f"[Console] {json_data}")
 
-# Future integration:
-# To send data to AWS SQS, replace send_data() logic with boto3 SQS client.
-# Example:
-# import boto3
-# sqs = boto3.client('sqs')
-# sqs.send_message(QueueUrl=..., MessageBody=json_data)
 
 def sensor_worker(sensor):
     while True:

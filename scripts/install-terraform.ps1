@@ -5,18 +5,11 @@ install-terraform.ps1
 Robust installer script for Terraform on Windows.
 
 Features:
-- Relaunches elevated if not run as Administrator.
-- Attempts to fix common Chocolatey permission problems.
-- Installs Terraform using `winget` if available, otherwise `choco`.
-- If neither package manager is available, prints manual-install instructions.
 
 Run from an elevated PowerShell (or allow the script to re-launch elevated).
 Usage:
   PS> .\scripts\install-terraform.ps1
 #>
-
-function Test-IsElevated {
-    $id = [Security.Principal.WindowsIdentity]::GetCurrent()
     $principal = New-Object Security.Principal.WindowsPrincipal($id)
     return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }

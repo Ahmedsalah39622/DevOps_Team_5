@@ -1,4 +1,3 @@
-// Variables for Phase 1 Terraform implementation (base AWS infrastructure)
 
 variable "aws_region" {
   description = "AWS region to deploy into"

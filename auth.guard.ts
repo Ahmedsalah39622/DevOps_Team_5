@@ -12,12 +12,12 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    // Check if user is authenticated (has valid JWT token)
+    
     if (this.authService.isAuthenticated()) {
       return true;
     }
 
-    // Redirect to login if not authenticated
+    
     this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
     return false;
   }

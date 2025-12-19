@@ -36,7 +36,7 @@ export class LoginComponent {
 
     this.authService.login(this.loginForm.value).subscribe({
       next: (response) => {
-        // Updated to use saveSession to store token AND expiration
+        
         this.authService.saveSession(response);
         this.isLoading = false;
         this.router.navigate(['/dashboard']);

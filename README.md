@@ -1,63 +1,57 @@
 
 
-# Smart CityOps DevOps Final Project
+Smart CityOps DevOps Final Project
 
-## Overview
+Overview
 Smart CityOps is an advanced, cloud-native DevOps platform designed to simulate and manage smart city IoT data flows. This graduate project demonstrates best practices in modern DevOps, integrating AWS, Terraform, Jenkins, Ansible, Docker, Nexus, and Kubernetes (EKS) to deliver a robust, scalable, and cost-efficient solution.
 
----
+Achievements & Current State
+* Infrastructure as Code: Automated provisioning of AWS VPC, subnets, security groups, IAM roles, and EKS clusters using Terraform.
+* Backend Service: Python API for sensor data, containerized with Docker, deployed to AWS ECS (Fargate) and ready for EKS.
+* IoT Simulation: Python-based simulator generates realistic traffic, pollution, and weather sensor data, posting to the backend API.
+* CI/CD Automation: Jenkins pipelines for infrastructure, configuration, Docker builds, and Kubernetes deployments.
+* Configuration Management: Ansible playbooks automate Nexus repository setup on EC2.
+* Cloud-Native Logging: CloudWatch logging integrated for backend container diagnostics.
+* Frontend: Next.js app (see frontend/README.md) for dashboard and visualization.
+* Cost Optimization: All resources use free-tier or spot instances where possible, with cleanup reminders in pipelines.
 
-## Achievements & Current State
-- **Infrastructure as Code:** Automated provisioning of AWS VPC, subnets, security groups, IAM roles, and EKS clusters using Terraform.
-- **Backend Service:** Python API for sensor data, containerized with Docker, deployed to AWS ECS (Fargate) and ready for EKS.
-- **IoT Simulation:** Python-based simulator generates realistic traffic, pollution, and weather sensor data, posting to the backend API.
-- **CI/CD Automation:** Jenkins pipelines for infrastructure, configuration, Docker builds, and Kubernetes deployments.
-- **Configuration Management:** Ansible playbooks automate Nexus repository setup on EC2.
-- **Cloud-Native Logging:** CloudWatch logging integrated for backend container diagnostics.
-- **Frontend:** Next.js app (see `frontend/README.md`) for dashboard and visualization.
-- **Cost Optimization:** All resources use free-tier or spot instances where possible, with cleanup reminders in pipelines.
+File & Directory Descriptions
 
----
+Infrastructure & IaC
+* main.tf, variables.tf, outputs.tf: Terraform scripts for AWS networking, security, and compute resources.
+* aws-auth.yaml, aws-auth-current.yaml: Kubernetes authentication config maps for AWS roles/users.
+* scops-backend-deployment.yaml: Kubernetes manifest for backend deployment.
 
-## File & Directory Descriptions
+CI/CD Pipelines
+* Jenkinsfile.terraform: Jenkins pipeline for Terraform infrastructure provisioning.
+* Jenkinsfile.ansible: Jenkins pipeline for Ansible-based Nexus setup.
+* Jenkinsfile.docker-backend: Jenkins pipeline for backend Docker build and push.
+* Jenkinsfile.docker-frontend: Jenkins pipeline for frontend Docker build and push.
+* Jenkinsfile.k8s-deploy: Jenkins pipeline for Kubernetes/EKS deployment.
 
-### Infrastructure & IaC
-- `main.tf`, `variables.tf`, `outputs.tf`: Terraform scripts for AWS networking, security, and compute resources.
-- `aws-auth.yaml`, `aws-auth-current.yaml`: Kubernetes authentication config maps for AWS roles/users.
-- `scops-backend-deployment.yaml`: Kubernetes manifest for backend deployment.
+Application & Simulation
+* backend_service.py: Python backend API for sensor data, connects to SQL Server, ECS/EKS-ready.
+* simulator.py: Python script simulating IoT sensors, sends data to backend via HTTP POST.
+* Dockerfile: Builds backend container, installs Python dependencies and ODBC drivers for SQL Server.
+* sensor_data.db: Local SQLite database (if used for testing).
 
-### CI/CD Pipelines
-- `Jenkinsfile.terraform`: Jenkins pipeline for Terraform infrastructure provisioning.
-- `Jenkinsfile.ansible`: Jenkins pipeline for Ansible-based Nexus setup.
-- `Jenkinsfile.docker-backend`: Jenkins pipeline for backend Docker build and push.
-- `Jenkinsfile.docker-frontend`: Jenkins pipeline for frontend Docker build and push.
-- `Jenkinsfile.k8s-deploy`: Jenkins pipeline for Kubernetes/EKS deployment.
+Task Definitions & Deployment
+* task-def.json: ECS task definition for backend container, including environment variables and resource settings.
 
-### Application & Simulation
-- `backend_service.py`: Python backend API for sensor data, connects to SQL Server, ECS/EKS-ready.
-- `simulator.py`: Python script simulating IoT sensors, sends data to backend via HTTP POST.
-- `Dockerfile`: Builds backend container, installs Python dependencies and ODBC drivers for SQL Server.
-- `sensor_data.db`: Local SQLite database (if used for testing).
+Frontend
+* frontend/: Next.js frontend app for dashboard and visualization (see its own README for details).
+* DevOps Dashboard/: Dashboard or monitoring UI (if used).
 
-### Task Definitions & Deployment
-- `task-def.json`: ECS task definition for backend container, including environment variables and resource settings.
+Documentation & Planning
+* README.md: This file, project overview and instructions.
+* Smart_CityOps_DataFlow_DevOps.docx: Project documentation.
+* project_plan (1).xlsx: Project planning spreadsheet.
 
-### Frontend
-- `frontend/`: Next.js frontend app for dashboard and visualization (see its own README for details).
-- `DevOps Dashboard/`: Dashboard or monitoring UI (if used).
+Scripts & Utilities
+* install-terraform.ps1: PowerShell script to install Terraform.
+* scripts/: Additional scripts (if present).
 
-### Documentation & Planning
-- `README.md`: This file, project overview and instructions.
-- `Smart_CityOps_DataFlow_DevOps.docx`: Project documentation.
-- `project_plan (1).xlsx`: Project planning spreadsheet.
-
-### Scripts & Utilities
-- `install-terraform.ps1`: PowerShell script to install Terraform.
-- `scripts/`: Additional scripts (if present).
-
----
-
-## How to Run the Project
+How to Run the Project
 1. Set up AWS credentials and install Terraform.
 2. Use Jenkins to run pipelines in this order:
     - Terraform Infrastructure Pipeline

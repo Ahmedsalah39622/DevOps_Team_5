@@ -114,6 +114,8 @@ namespace Smart_CityOps
             {
                 Console.WriteLine("Admin user already exists. No changes made.");
             }
+
         }
+        
     }
 }

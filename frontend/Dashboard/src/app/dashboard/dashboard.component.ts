@@ -20,7 +20,7 @@ export class DashboardComponent implements OnInit {
   filterType: string = 'All';
   filterSensorId: string = '';
   
-  // Time filters (optional now, since backend limits to 1000)
+  
   customStart: string = '';
   customEnd: string = '';
 
@@ -56,7 +56,7 @@ export class DashboardComponent implements OnInit {
   loadHistory(): void {
     this.isLoading = true;
     
-    // Prepare date params if user selected them
+    
     let fromIso = '';
     let toIso = '';
 
@@ -87,7 +87,7 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  // Styles
+  
   getPollutionClass(status: string): string {
     if (status === 'Good') return 'card-good';
     if (status === 'Moderate') return 'card-warning';
